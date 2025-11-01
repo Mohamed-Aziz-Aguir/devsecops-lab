@@ -1,0 +1,15 @@
+repos:
+  - repo: https://github.com/zricethezav/gitleaks
+    rev: v8.18.4
+    hooks:
+      - id: gitleaks
+  - repo: https://github.com/semgrep/semgrep
+    rev: 1.92.0
+    hooks:
+      - id: semgrep
+        args: ["--config", "p/owasp-top-ten", "--error"]
+  - repo: https://github.com/pycqa/bandit
+    rev: 1.7.9
+    hooks:
+      - id: bandit
+        args: ["-r", "."]
