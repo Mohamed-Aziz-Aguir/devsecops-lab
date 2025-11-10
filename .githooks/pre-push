@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "[pre-push] Running pre-commit hooks..."
+if ! command -v pre-commit >/dev/null 2>&1; then
+  python -m pip install --user pre-commit >/dev/null
+fi
+pre-commit run --all-files
+
+if command -v gitleaks >/dev/null 2>&1; then
+  echo "[pre-push] Running gitleaks..."
+  gitleaks detect --no-banner --redact --exit-code 1 || exit 1
+fi
+
+if [[ -n "${SONAR_HOST_URL:-}" && -n "${SONAR_TOKEN:-}" ]]; then
+  echo "[pre-push] Running SonarScanner (quick) ..."
+  docker run --rm -e SONAR_HOST_URL -e SONAR_TOKEN -v $PWD:/usr/src sonarsource/sonar-scanner-cli:latest
+fi
+
+echo "[pre-push] OK"

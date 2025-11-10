@@ -1,15 +1,31 @@
 repos:
-  - repo: https://github.com/zricethezav/gitleaks
-    rev: v8.18.4
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
     hooks:
-      - id: gitleaks
-  - repo: https://github.com/semgrep/semgrep
-    rev: 1.92.0
+      - id: check-added-large-files
+      - id: check-merge-conflict
+      - id: detect-private-key
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+
+  - repo: https://github.com/psf/black
+    rev: 24.10.0
     hooks:
-      - id: semgrep
-        args: ["--config", "p/owasp-top-ten", "--error"]
-  - repo: https://github.com/pycqa/bandit
-    rev: 1.7.9
+      - id: black
+
+  - repo: https://github.com/pycqa/ruff-pre-commit
+    rev: v0.6.9
+    hooks:
+      - id: ruff
+
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.7.10
     hooks:
       - id: bandit
         args: ["-r", "."]
+
+  - repo: https://github.com/returntocorp/semgrep
+    rev: v1.86.0
+    hooks:
+      - id: semgrep
+        args: ["--error", "--config", "p/ci"]
