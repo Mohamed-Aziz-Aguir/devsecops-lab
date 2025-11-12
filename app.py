@@ -30,11 +30,13 @@ class Customer(db.Model):
     date_opened = db.Column(db.DateTime, default=datetime.utcnow)
     status = db.Column(db.String(10), default='active')
 
-# Create tables
+# Create tables & seed safely (SQLite + single worker recommended)
 with app.app_context():
+    # Create tables if missing (CREATE IF NOT EXISTS semantics)
     db.create_all()
-    # Create default admin if none exists
-    if not Admin.query.filter_by(username='admin').first():
+
+    # Seed default admin idempotently (check by unique email)
+    if not Admin.query.filter_by(email='admin@example.com').first():
         default_admin = Admin(
             username='admin',
             email='admin@example.com',
