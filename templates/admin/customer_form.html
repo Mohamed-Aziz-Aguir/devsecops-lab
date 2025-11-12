@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if customer %}Edit Customer{% else %}Add Customer{% endif %}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center fade-in">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">{% if customer %}Edit Customer{% else %}Add New Customer{% endif %}</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="full_name" class="form-label">Full Name</label>
+                        <input type="text" class="form-control" id="full_name" name="full_name" value="{{ customer.full_name if customer else '' }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" value="{{ customer.email if customer else '' }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password {% if customer %}(Leave blank to keep current){% endif %}</label>
+                        <input type="password" class="form-control" id="password" name="password" {% if not customer %}required{% endif %}>
+                    </div>
+                    <div class="mb-3">
+                        <label for="confirm_password" class="form-label">Confirm Password {% if customer %}(Leave blank to keep current){% endif %}</label>
+                        <input type="password" class="form-control" id="confirm_password" name="confirm_password" {% if not customer %}required{% endif %}>
+                    </div>
+                    {% if customer %}
+                    <div class="mb-3">
+                        <label for="bank_account_number" class="form-label">Account Number</label>
+                        <input type="text" class="form-control" id="bank_account_number" name="bank_account_number" value="{{ customer.bank_account_number }}" readonly>
+                    </div>
+                    {% endif %}
+                    <div class="mb-3">
+                        <label for="account_type" class="form-label">Account Type</label>
+                        <select class="form-select" id="account_type" name="account_type" required>
+                            <option value="">Select Account Type</option>
+                            <option value="savings" {% if customer and customer.account_type == 'savings' %}selected{% endif %}>Savings</option>
+                            <option value="checking" {% if customer and customer.account_type == 'checking' %}selected{% endif %}>Checking</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="balance" class="form-label">Balance</label>
+                        <input type="number" step="0.01" class="form-control" id="balance" name="balance" value="{{ customer.balance if customer else '0.00' }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="status" class="form-label">Status</label>
+                        <select class="form-select" id="status" name="status" required>
+                            <option value="active" {% if customer and customer.status == 'active' %}selected{% endif %}>Active</option>
+                            <option value="inactive" {% if customer and customer.status == 'inactive' %}selected{% endif %}>Inactive</option>
+                        </select>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('customer_list') }}" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">{% if customer %}Update{% else %}Create{% endif %}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

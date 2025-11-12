@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if admin %}Edit Admin{% else %}Add Admin{% endif %}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center fade-in">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">{% if admin %}Edit Admin{% else %}Add New Admin{% endif %}</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="username" name="username" value="{{ admin.username if admin else '' }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" value="{{ admin.email if admin else '' }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password {% if admin %}(Leave blank to keep current){% endif %}</label>
+                        <input type="password" class="form-control" id="password" name="password" {% if not admin %}required{% endif %}>
+                    </div>
+                    <div class="mb-3">
+                        <label for="confirm_password" class="form-label">Confirm Password {% if admin %}(Leave blank to keep current){% endif %}</label>
+                        <input type="password" class="form-control" id="confirm_password" name="confirm_password" {% if not admin %}required{% endif %}>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('admin_list') }}" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">{% if admin %}Update{% else %}Create{% endif %}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

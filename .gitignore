@@ -1,12 +1,39 @@
+# Python
 __pycache__/
-*.pyc
-.env
-.venv/
-reports/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+*.egg-info/
 dist/
-.build/
-.coverage
-htmlcov/
-.DS_Store
-.idea/
+build/
+
+# Flask
+instance/
+.webassets-cache
+
+# Database
+banking.db
+*.db
+
+# IDE
 .vscode/
+.idea/
+*.swp
+*.swo
+
+# Security reports
+zap-reports/
+reports/
+.sonar/
+
+# Environment
+.env
+.env.local
+
+# Temporary files
+*.log
+.DS_Store
