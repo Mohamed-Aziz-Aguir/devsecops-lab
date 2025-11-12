@@ -11,6 +11,13 @@ ENV/
 dist/
 build/
 
+# Flask
+instance/
+.webassets-cache
+
+# Database
+banking.db
+*.db
 
 # IDE
 .vscode/
