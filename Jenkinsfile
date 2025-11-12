@@ -26,7 +26,7 @@ pipeline {
         stage("Git Checkout") {
             steps {
                 echo "Cloning repository from GitHub..."
-                git branch: 'main', url: 'https://github.com/yahyakaddour/bank-simple-app.git'
+                git branch: 'main', url: 'https://github.com/Mohamed-Aziz-Aguir/devsecops-lab.git'
             }
         }
 
@@ -289,8 +289,8 @@ pipeline {
                             </body>
                         </html>
                     """,
-                    to: 'yahyakaddour5@gmail.com',
-                    from: 'yahyakaddour5@gmail.com',
+                    to: 'mohamedaziz.aguir@gmail.com',
+                    from: 'mohamedaziz.aguir@gmail.com',
                     mimeType: 'text/html',
                     attachmentsPattern: 'security-reports/**'
                 )
