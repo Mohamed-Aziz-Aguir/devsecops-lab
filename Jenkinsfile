@@ -30,37 +30,44 @@ pipeline {
             }
         }
 
-        stage('BUILD') {
-            steps {
-                echo "Installing Python dependencies..."
-                sh '''
-                    apt-get update && apt-get install -y python3-pip 
-                    python3 -m pip install --upgrade pip
-                    pip install -r requirements.txt
-                    pip install pytest pytest-cov pylint flake8 bandit
-                '''
-            }
-            post {
-                success {
-                    echo 'Dependencies installed successfully'
-                }
-            }
-        }
+ stage('BUILD') {
+    steps {
+        echo "Installing Python dependencies..."
+        sh '''
+            apt-get update && apt-get install -y python3 python3-pip
 
-        stage('UNIT TEST') {
-            steps {
-                echo "Running unit tests with pytest..."
-                sh '''
-                    pytest --cov=. --cov-report=xml --cov-report=html -v  
-                '''
-            }
-            post {
-                success {
-                    echo 'Unit tests completed'
-                    archiveArtifacts artifacts: 'htmlcov/**', allowEmptyArchive: true
-                }
-            }
+            # Upgrade pip for python3
+            python3 -m pip install --upgrade pip
+
+            # Install all deps from requirements
+            python3 -m pip install -r requirements.txt
+
+            # (Optional, but requirements already have these – you can drop this line)
+            python3 -m pip install pytest pytest-cov pylint flake8 bandit
+        '''
+    }
+    post {
+        success {
+            echo 'Dependencies installed successfully'
         }
+    }
+}
+
+stage('UNIT TEST') {
+    steps {
+        echo "Running unit tests with pytest..."
+        sh '''
+            python3 -m pytest --cov=. --cov-report=xml --cov-report=html -v
+        '''
+    }
+    post {
+        success {
+            echo 'Unit tests completed'
+            archiveArtifacts artifacts: 'htmlcov/**', allowEmptyArchive: true
+        }
+    }
+}
+
 
         stage('INTEGRATION TEST') {
             steps {
