@@ -36,14 +36,9 @@ pipeline {
         sh '''
             apt-get update && apt-get install -y python3 python3-pip
 
-            # Upgrade pip for python3
+            # Upgrade pip and install dependencies
             python3 -m pip install --upgrade pip
-
-            # Install all deps from requirements
             python3 -m pip install -r requirements.txt
-
-            # (Optional, but requirements already have these – you can drop this line)
-            python3 -m pip install pytest pytest-cov pylint flake8 bandit
         '''
     }
     post {
@@ -52,6 +47,7 @@ pipeline {
         }
     }
 }
+
 
 stage('UNIT TEST') {
     steps {
@@ -69,30 +65,35 @@ stage('UNIT TEST') {
 }
 
 
-        stage('INTEGRATION TEST') {
-            steps {
-                echo "Running integration tests and code quality checks..."
-                sh '''
-                    pylint app.py --fail-under=7.0 --exit-zero
-                    flake8 app.py --count --exit-zero --max-complexity=10 
-                '''
-            }
-        }
+stage('INTEGRATION TEST') {
+    steps {
+        echo "Running integration tests and code quality checks..."
+        sh '''
+            # Pylint – fail if score < 7.0
+            python3 -m pylint app.py --fail-under=7.0
+
+            # Flake8 – fail if there are violations
+            python3 -m flake8 app.py --count --max-complexity=10
+        '''
+    }
+}
+
 
         stage('CODE ANALYSIS WITH BANDIT') {
-            steps {
-                echo "Running Bandit security analysis..."
-                sh '''
-                    bandit -r . -f json -o bandit-report.json 
-                    bandit -r . -f txt -o bandit-report.txt 
-                '''
-            }
-            post {
-                success {
-                    echo 'Bandit analysis completed'
-                }
-            }
+    steps {
+        echo "Running Bandit security analysis..."
+        sh '''
+            python3 -m bandit -r . -f json -o bandit-report.json
+            python3 -m bandit -r . -f txt -o bandit-report.txt
+        '''
+    }
+    post {
+        success {
+            echo 'Bandit analysis completed'
         }
+    }
+}
+
 
         stage('CODE ANALYSIS with SONARQUBE') {
             steps {
@@ -123,15 +124,15 @@ stage('UNIT TEST') {
             }
         }
 
-        stage("Python Dependency Check Scan") {
-            steps {
-                echo "Scanning Python dependencies for vulnerabilities..."
-                sh '''
-                    pip install pip-audit
-                    pip-audit --desc > pip-audit-report.txt 
-                '''
-            }
-        }
+   stage("Python Dependency Check Scan") {
+    steps {
+        echo "Scanning Python dependencies for vulnerabilities..."
+        sh '''
+            python3 -m pip install pip-audit
+            python3 -m pip_audit --desc > pip-audit-report.txt
+        '''
+    }
+}
 
         stage("Trivy File Scan") {
             steps {
