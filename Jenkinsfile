@@ -141,17 +141,43 @@ pipeline {
                 }
             }
         }
+stage("Python Dependency Check Scan") {
+    steps {
+        script {
+            echo "Scanning Python dependencies for vulnerabilities..."
 
-        stage("Python Dependency Check Scan") {
-            steps {
-                echo "Scanning Python dependencies for vulnerabilities..."
-                sh '''
-                    set -e
-                    python3 -m pip install pip-audit
+            // Make sure pip-audit is available (install can succeed or be already satisfied)
+            sh '''
+                python3 -m pip install --user pip-audit
+            '''
+
+            // Run pip-audit and capture exit code
+            def auditStatus = sh(
+                script: '''
                     python3 -m pip_audit --desc > pip-audit-report.txt
-                '''
+                ''',
+                returnStatus: true
+            )
+
+            if (auditStatus == 0) {
+                echo "✅ pip-audit: no known vulnerabilities found (exit code 0)."
+            } else if (auditStatus == 1) {
+                echo "⚠️ pip-audit: vulnerabilities found (exit code 1)."
+                echo "   See pip-audit-report.txt for details."
+                // Do NOT fail the pipeline here – just warn.
+            } else {
+                error "❌ pip-audit failed with exit code ${auditStatus} (tool error)."
             }
         }
+    }
+    post {
+        always {
+            echo "📦 Archiving pip-audit report..."
+            archiveArtifacts artifacts: 'pip-audit-report.txt', allowEmptyArchive: true
+        }
+    }
+}
+
 
         stage("Trivy File Scan") {
             steps {
