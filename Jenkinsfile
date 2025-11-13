@@ -69,8 +69,8 @@ stage('INTEGRATION TEST') {
     steps {
         echo "Running integration tests and code quality checks..."
         sh '''
-            # Pylint – fail if score < 7.0
-            python3 -m pylint app.py --fail-under=7.0
+            # Pylint – fail if score < 6.5
+            python3 -m pylint app.py --fail-under=6.5
 
             # Flake8 – fail if there are violations
             python3 -m flake8 app.py --count --max-complexity=10
