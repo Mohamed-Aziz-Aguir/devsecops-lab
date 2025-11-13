@@ -35,13 +35,21 @@ with app.app_context():
     db.create_all()
     # Create default admin if none exists
     if not Admin.query.filter_by(username='admin').first():
-        default_admin = Admin(
-            username='admin',
-            email='admin@example.com',
-            password=generate_password_hash('admin123')
-        )
-        db.session.add(default_admin)
-        db.session.commit()
+        admin_password = os.environ.get("DEFAULT_ADMIN_PASSWORD")
+
+        if admin_password:
+            default_admin = Admin(
+                username='admin',
+                email='admin@example.com',
+                password=generate_password_hash(admin_password)
+            )
+            db.session.add(default_admin)
+            db.session.commit()
+        else:
+            # No default admin created if password not provided
+            app.logger.warning(
+                "DEFAULT_ADMIN_PASSWORD not set - default admin user was NOT created."
+            )
 
 # Decorators for access control
 def login_required(f):

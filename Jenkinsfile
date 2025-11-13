@@ -34,7 +34,7 @@ pipeline {
             steps {
                 echo "Installing Python dependencies..."
                 sh '''
-                    apt-get update && apt-get install -y python3-pip || true
+                    apt-get update && apt-get install -y python3-pip 
                     python3 -m pip install --upgrade pip
                     pip install -r requirements.txt
                     pip install pytest pytest-cov pylint flake8 bandit
@@ -51,7 +51,7 @@ pipeline {
             steps {
                 echo "Running unit tests with pytest..."
                 sh '''
-                    pytest --cov=. --cov-report=xml --cov-report=html -v || true
+                    pytest --cov=. --cov-report=xml --cov-report=html -v  
                 '''
             }
             post {
@@ -66,8 +66,8 @@ pipeline {
             steps {
                 echo "Running integration tests and code quality checks..."
                 sh '''
-                    pylint app.py --fail-under=7.0 --exit-zero || true
-                    flake8 app.py --count --exit-zero --max-complexity=10 || true
+                    pylint app.py --fail-under=7.0 --exit-zero
+                    flake8 app.py --count --exit-zero --max-complexity=10 
                 '''
             }
         }
@@ -76,8 +76,8 @@ pipeline {
             steps {
                 echo "Running Bandit security analysis..."
                 sh '''
-                    bandit -r . -f json -o bandit-report.json || true
-                    bandit -r . -f txt -o bandit-report.txt || true
+                    bandit -r . -f json -o bandit-report.json 
+                    bandit -r . -f txt -o bandit-report.txt 
                 '''
             }
             post {
@@ -121,7 +121,7 @@ pipeline {
                 echo "Scanning Python dependencies for vulnerabilities..."
                 sh '''
                     pip install pip-audit
-                    pip-audit --desc > pip-audit-report.txt || true
+                    pip-audit --desc > pip-audit-report.txt 
                 '''
             }
         }
@@ -129,7 +129,7 @@ pipeline {
         stage("Trivy File Scan") {
             steps {
                 echo "Running Trivy filesystem scan..."
-                sh "trivy fs . > trivyfs.txt || true"
+                sh "trivy fs . > trivyfs.txt "
             }
         }
 
@@ -138,7 +138,7 @@ pipeline {
                 echo "Building Docker image: ${IMAGE_NAME}:${BUILD_NUMBER}"
                 script {
                     env.IMAGE_TAG = "${IMAGE_NAME}:${BUILD_NUMBER}"
-                    sh "docker rmi -f ${IMAGE_NAME}:latest ${env.IMAGE_TAG} || true"
+                    sh "docker rmi -f ${IMAGE_NAME}:latest ${env.IMAGE_TAG} "
                     
                     // Build and tag Docker image
                     dockerImage = docker.build("${IMAGE_NAME}:latest", ".")
@@ -152,8 +152,8 @@ pipeline {
                 script {
                     echo "🔍 Running Trivy scan on Docker image: ${env.IMAGE_TAG}"
                     sh '''
-                        trivy image -f json -o trivy-image.json ${IMAGE_TAG} || true
-                        trivy image -f table -o trivy-image.txt ${IMAGE_TAG} || true
+                        trivy image -f json -o trivy-image.json ${IMAGE_TAG}
+                        trivy image -f table -o trivy-image.txt ${IMAGE_TAG} 
                     '''
                 }
             }
@@ -164,7 +164,7 @@ pipeline {
                 echo "Deploying Flask app to container..."
                 script {
                     sh '''
-                        docker rm -f flask-app-prod || true
+                        docker rm -f flask-app-prod 
                         docker run -d --name flask-app-prod -p 5000:5000 ${IMAGE_TAG}
                         sleep 10
                         
@@ -194,7 +194,7 @@ pipeline {
                         docker run --rm --user root --network host -v $(pwd):/zap/wrk:rw \
                         -t zaproxy/zap-stable zap-baseline.py \
                         -t http://localhost:5000 \
-                        -r zap_report.html -J zap_report.json || true
+                        -r zap_report.html -J zap_report.json 
                     ''', returnStatus: true)
 
                     echo "ZAP scan finished with exit code: ${exitCode}"
@@ -242,11 +242,11 @@ pipeline {
                 // Collect all security reports
                 sh '''
                     mkdir -p security-reports
-                    cp bandit-report.* security-reports/ 2>/dev/null || true
-                    cp pip-audit-report.txt security-reports/ 2>/dev/null || true
-                    cp trivyfs.txt security-reports/ 2>/dev/null || true
-                    cp trivy-image.* security-reports/ 2>/dev/null || true
-                    cp zap_report.* security-reports/ 2>/dev/null || true
+                    cp bandit-report.* security-reports/ 2>/dev/null 
+                    cp pip-audit-report.txt security-reports/ 2>/dev/null 
+                    cp trivyfs.txt security-reports/ 2>/dev/null 
+                    cp trivy-image.* security-reports/ 2>/dev/null 
+                    cp zap_report.* security-reports/ 2>/dev/null 
                 '''
                 
                 archiveArtifacts artifacts: 'security-reports/**', allowEmptyArchive: true
