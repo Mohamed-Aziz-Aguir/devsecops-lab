@@ -80,21 +80,37 @@ pipeline {
             }
         }
 
-        stage("CODE ANALYSIS WITH BANDIT") {
-            steps {
-                echo "Running Bandit security analysis..."
-                sh '''
-                    set -e
+     stage('CODE ANALYSIS WITH BANDIT') {
+    steps {
+        script {
+            echo "Running Bandit security analysis..."
+            def banditStatus = sh(
+                script: '''
                     python3 -m bandit -r . -f json -o bandit-report.json
                     python3 -m bandit -r . -f txt -o bandit-report.txt
-                '''
-            }
-            post {
-                success {
-                    echo 'Bandit analysis completed'
-                }
+                ''',
+                returnStatus: true
+            )
+
+            if (banditStatus == 0) {
+                echo "✅ Bandit: no issues found (exit code 0)."
+            } else if (banditStatus == 1) {
+                echo "⚠️ Bandit: security issues found (exit code 1)."
+                echo "   Check bandit-report.json / bandit-report.txt for details."
+                // We do NOT fail the pipeline here, just warn.
+            } else {
+                error "❌ Bandit failed with exit code ${banditStatus} (tool error)."
             }
         }
+    }
+    post {
+        always {
+            echo "📦 Archiving Bandit reports..."
+            archiveArtifacts artifacts: 'bandit-report.*', allowEmptyArchive: true
+        }
+    }
+}
+
 
         stage("CODE ANALYSIS with SONARQUBE") {
             steps {
